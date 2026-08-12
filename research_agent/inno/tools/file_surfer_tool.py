@@ -13,6 +13,7 @@ import uuid
 import os
 from litellm import completion
 from research_agent.constant import COMPLETION_MODEL, API_BASE_URL
+from research_agent.inno.llm_runtimes_compat import apply_llm_runtimes
 def with_env(env: RequestsMarkdownBrowser):
     """将env注入到工具函数中的装饰器"""
     def decorator(func):
@@ -183,7 +184,7 @@ def visualizer(env: RequestsMarkdownBrowser, image_path: str, question: Optional
             {"type": "text", "text": question},
             {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{base64_image}"}}
         ]}]
-        res = completion(model=COMPLETION_MODEL, messages=msg)
+        res = completion(**apply_llm_runtimes({"model": COMPLETION_MODEL, "messages": msg}))
         ret_str = res.choices[0].message.content
         return Result(
             value=ret_str,
@@ -224,7 +225,7 @@ Please answer my question based on the content.
         msg = [{"role": "user", "content": [
             {"type": "text", "text": wrap_ques}
         ]}]
-        res = completion(model=COMPLETION_MODEL, messages=msg, base_url=API_BASE_URL)
+        res = completion(**apply_llm_runtimes({"model": COMPLETION_MODEL, "messages": msg, "base_url": API_BASE_URL}))
         answer = res.choices[0].message.content
         return answer
     except FileNotFoundError as e:

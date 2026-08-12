@@ -34,6 +34,7 @@ from openai import AsyncOpenAI
 from research_agent.constant import  API_BASE_URL, NOT_SUPPORT_SENDER, MUST_ADD_USER, NOT_SUPPORT_FN_CALL, NOT_USE_FN_CALL
 from research_agent.inno.fn_call_converter import convert_tools_to_description, convert_non_fncall_messages_to_fncall_messages, SYSTEM_PROMPT_SUFFIX_TEMPLATE, convert_fn_messages_to_non_fn_messages, interleave_user_into_messages
 from research_agent.inno.memory.utils import encode_string_by_tiktoken, decode_tokens_by_tiktoken
+from research_agent.inno.llm_runtimes_compat import apply_llm_runtimes
 import re
 
 # litellm.set_verbose=True
@@ -156,6 +157,7 @@ class MetaChain:
         if tools and create_params['model'].startswith("gpt"):
             create_params["parallel_tool_calls"] = agent.parallel_tool_calls
 
+        apply_llm_runtimes(create_params)
         return completion(**create_params)
 
     def handle_function_result(self, result, debug) -> Result:
@@ -397,6 +399,7 @@ class MetaChain:
 
             if tools and create_params['model'].startswith("gpt"):
                 create_params["parallel_tool_calls"] = agent.parallel_tool_calls
+            apply_llm_runtimes(create_params)
             completion_response = await acompletion(**create_params)
         elif create_model in NOT_USE_FN_CALL:
             assert agent.tool_choice == "required", f"Non-function calling mode MUST use tool_choice = 'required' rather than {agent.tool_choice}"
