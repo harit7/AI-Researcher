@@ -76,3 +76,14 @@ first use.
   but if anything inside the container needs to reach the runtime server,
   `LLM_RUNTIMES_PORT` (default 8399) must be reachable from the container
   (e.g. host networking). Not addressed here; noted for later.
+
+## Overnight run attempt (2026-08-12)
+
+The LLM plumbing works end to end on this host (smoke test passed via
+claudecli-haiku). A full pipeline run is NOT possible on this machine tonight:
+container execution is required, and rootless podman fails to unpack images
+("potentially insufficient UIDs or GIDs available in user namespace" - the host
+has no /etc/subuid,/etc/subgid mappings for this user; needs a sysadmin, e.g.
+`usermod --add-subuids 100000-165535 --add-subgids 100000-165535 <user>` then
+`podman system migrate`). On a machine with working docker, the documented
+recipes above should run as-is.
